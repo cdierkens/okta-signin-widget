@@ -163,9 +163,9 @@ export default Router.extend({
         }
       }, error);
     }
+    else if (error.error && error.error_description) {
+      // captures unknown errors, usually thrown from /interact or /introspect
 
-    // captures unknown errors, usually thrown from /interact or /introspect
-    if (error.error && error.error_description) {
       // log unknown error
       this.settings.callGlobalError(error);
 

@@ -66,6 +66,7 @@ describe('v2/WidgetRouter', function() {
 
   beforeEach(function() {
     testContext = {};
+    window.console.error = (()=>{});  // silences error printed to test console
   });
 
   afterEach(function() {
