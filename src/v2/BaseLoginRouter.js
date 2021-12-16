@@ -135,15 +135,19 @@ export default Router.extend({
   },
 
   handleIdxResponseFailure(error = {}) {
-    if (error instanceof Errors.IdxInteractError) {
+    // special case: `useInteractionCodeFlow` is true but the Org does not have OIE enabled
+    // The response is not in IDX format. See playground/mocks/data/oauth2/error-feature-not-enabled.json
+    if (error?.error === 'access_denied' && error.error_description) {
       // simulate an IDX error response
       const idxMessages = {
         messages: {
           type: 'array',
           value: [
             {
-              // TODO: use a different string?
-              message: loc('u2f.error.other.oneFactor', 'login'),
+              message: error.error_description,
+              i18n: {
+                key: 'oie.feature.disabled'
+              },
               class: 'ERROR'
             }
           ],
@@ -160,19 +164,18 @@ export default Router.extend({
       }, error);
     }
 
-    // special case: `useInteractionCodeFlow` is true but the Org does not have OIE enabled
-    // The response is not in IDX format. See playground/mocks/data/oauth2/error-feature-not-enabled.json
-    if (error?.error === 'access_denied' && error.error_description) {
+    // captures unknown errors, usually thrown from /interact or /introspect
+    if (error.error && error.error_description) {
+      // log unknown error
+      this.settings.callGlobalError(error);
+
       // simulate an IDX error response
       const idxMessages = {
         messages: {
           type: 'array',
           value: [
             {
-              message: error.error_description,
-              i18n: {
-                key: 'oie.feature.disabled'
-              },
+              message: loc('error.idx.unknown.error', 'login'),
               class: 'ERROR'
             }
           ],

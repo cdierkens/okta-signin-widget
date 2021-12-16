@@ -66,8 +66,8 @@ export async function interact(settings) {
       // return idx response
       return response;
     })
-    .catch(err => {
-      const { error, error_description } = err;
-      throw new Errors.IdxInteractError(error_description, error);
-    });
+    // .catch(err => {
+    //   const { error, error_description } = err;
+    //   throw new Errors.IdxInteractError(error_description, error);
+    // });
 }
