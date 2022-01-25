@@ -6,6 +6,8 @@ import xhrIdentify from '../../../playground/mocks/data/idp/idx/identify';
 import xhrErrorIdentify from '../../../playground/mocks/data/idp/idx/error-identify-access-denied';
 import xhrAuthenticatorVerifySelect from '../../../playground/mocks/data/idp/idx/authenticator-verification-select-authenticator';
 import xhrAuthenticatorOVTotp from '../../../playground/mocks/data/idp/idx/authenticator-verification-okta-verify-totp';
+import xhrErrorIdentifyMultipleErrors from '../../../playground/mocks/data/idp/idx/error-identify-multiple-errors';
+
 import config from '../../../src/config/config.json';
 
 const baseIdentifyMock = RequestMock()
@@ -73,6 +75,10 @@ const identifyThenSelectAuthenticatorMock = RequestMock()
   .respond(xhrIdentify)
   .onRequestTo('http://localhost:3000/idp/idx/identify')
   .respond(xhrAuthenticatorVerifySelect);
+
+const errorsIdentifyMock = RequestMock()
+  .onRequestTo('http://localhost:3000/idp/idx/introspect')
+  .respond(xhrErrorIdentifyMultipleErrors);
 
 const identifyRequestLogger = RequestLogger(
   /idx\/identify|\/challenge/,
@@ -396,4 +402,15 @@ test.requestHooks(identifyRequestLogger, baseIdentifyMock)('should show "Keep me
   // Ensure checkbox is shown
   doesCheckboxExist = identityPage.identifierFieldExists('.custom-checkbox [name="rememberMe"');
   await t.expect(doesCheckboxExist).eql(true);
+});
+
+test.requestHooks(identifyRequestLogger, errorsIdentifyMock)('should render each error message when there are multiple', async t => {
+  const identityPage = await setup(t);
+
+  const errors = identityPage.form.getAllErrorBoxTexts();
+  await t.expect(errors).eql([
+    'Please enter a username',
+    'Please enter a password',
+    'Your session has expired. Please try to sign in again.'
+  ]);
 });
