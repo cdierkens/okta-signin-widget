@@ -1,14 +1,11 @@
 import { $, loc, createCallout } from 'okta';
 import { BaseFormWithPolling } from '../../internals';
 import Logger from '../../../../util/Logger';
-import { CHALLENGE_TIMEOUT } from '../../utils/Constants';
+import { CHALLENGE_TIMEOUT, 
+  OV_UV_ENABLE_BIOMETRICS_FASTPASS_DESKTOP, 
+  OV_UV_ENABLE_BIOMETRICS_FASTPASS_MOBILE } from '../../utils/Constants';
 import BrowserFeatures from '../../../../util/BrowserFeatures';
 import { doChallenge } from '../../utils/ChallengeViewUtil';
-
-const OV_UV_ENABLE_BIOMETRICS_FASTPASS_DESKTOP 
-    = 'oie.authenticator.oktaverify.method.fastpass.verify.enable.biometrics.desktop';
-const OV_UV_ENABLE_BIOMETRICS_FASTPASS_MOBILE 
-    = 'oie.authenticator.oktaverify.method.fastpass.verify.enable.biometrics.mobile';
 
 const request = (opts) => {
   const ajaxOptions = Object.assign({

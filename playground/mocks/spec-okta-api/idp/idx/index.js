@@ -1,5 +1,9 @@
 const templateHelper = require('../../../config/templateHelper');
 const cancelTransaction = require('../../../data/idp/idx/identify-with-no-sso-extension');
+const biometricsErrorMobile = 
+  require('../../../data/idp/idx/error-okta-verify-uv-fastpass-verify-enable-biometrics-mobile');
+const biometricsErrorDesktop = 
+  require('../../../data/idp/idx/error-okta-verify-uv-fastpass-verify-enable-biometrics-desktop');
 
 const idx = [
   '/idp/idx',
@@ -47,7 +51,7 @@ const ssoExtension = [
       next();
     },
     // TODO: find a way to improve this, now the mock config is not always on responseConfig
-    template: cancelTransaction,
+    template: cancelTransaction, // To test biometrics error, change it to biometricsErrorMobile/biometricsErrorDesktop
   })
 ];
 

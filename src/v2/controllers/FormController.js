@@ -14,6 +14,8 @@ import ViewFactory from '../view-builder/ViewFactory';
 import IonResponseHelper from '../ion/IonResponseHelper';
 import { getV1ClassName } from '../ion/ViewClassNamesFactory';
 import { FORMS, TERMINAL_FORMS, FORM_NAME_TO_OPERATION_MAP } from '../ion/RemediationConstants';
+import { OV_UV_ENABLE_BIOMETRICS_FASTPASS_DESKTOP, 
+  OV_UV_ENABLE_BIOMETRICS_FASTPASS_MOBILE } from '../view-builder/utils/Constants';
 import Util from '../../util/Util';
 import sessionStorageHelper from '../client/sessionStorageHelper';
 import { clearTransactionMeta } from '../client';
@@ -216,12 +218,14 @@ export default Controller.extend({
           onSuccess();
         }
       }).catch(error => {
-        if (error.stepUp) {
+        if (error.stepUp && !this.isBiometricsErrorFlow(error)) {
           // Okta server responds 401 status code with WWW-Authenticate header and new remediation
           // so that the iOS/MacOS credential SSO extension (Okta Verify) can intercept
           // the response reaches here when Okta Verify is not installed
           // we need to return an idx object so that
           // the SIW can proceed to the next step without showing error
+          // Also, if the received error is biometrics required error,
+          // we will step into below else block to show custom error messages
           this.handleIdxResponse(error);
         } else {
           this.showFormErrors(model, error, this.formView.form);
@@ -230,6 +234,17 @@ export default Controller.extend({
       .finally(() => {
         this.toggleFormButtonState(false);
       });
+  },
+
+  isBiometricsErrorFlow(error) {
+    if (!error?.context?.messages) {
+      return false;
+    }
+
+    const messagesObjs = error.context.messages.value;
+    const biometricsErrorKeys = [OV_UV_ENABLE_BIOMETRICS_FASTPASS_DESKTOP, OV_UV_ENABLE_BIOMETRICS_FASTPASS_MOBILE];
+    return messagesObjs && Array.isArray(messagesObjs)
+    && messagesObjs.some(messagesObj => _.contains(biometricsErrorKeys, messagesObj.i18n?.key));
   },
 
   transformIdentifier(formName, model) {
